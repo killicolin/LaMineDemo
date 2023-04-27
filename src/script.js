@@ -2,7 +2,8 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
 import testVertexShader from './shaders/test/vertex.glsl'
-import testFragmentShader from './shaders/test/frag_miror.glsl'
+import testFragmentShader1 from './shaders/test/frag_miror.glsl'
+import testFragmentShader2 from './shaders/test/water_drop.glsl'
 
 /**
  * Base
@@ -27,9 +28,9 @@ const textureLoader = new THREE.TextureLoader();
 const flagTexture = textureLoader.load('textures/test.jpg')
 
 // Material
-const material = new THREE.ShaderMaterial({
+const mat1 = new THREE.ShaderMaterial({
     vertexShader: testVertexShader,
-    fragmentShader: testFragmentShader,
+    fragmentShader: testFragmentShader1,
     side: THREE.DoubleSide,
     uniforms:{
         uUvOffset: {value:-0.01},
@@ -41,14 +42,56 @@ const material = new THREE.ShaderMaterial({
     }
 })
 
-gui.add(material.uniforms.uCenter.value, 'x').min(0.0).max(1.0).step(0.001).name('Center_X')
-gui.add(material.uniforms.uCenter.value, 'y').min(0.0).max(1.0).step(0.001).name('Center_Y')
-gui.add(material.uniforms.uUvOffset, 'value').min(-0.1).max(0.1).step(0.001).name('UvOffset')
-gui.add(material.uniforms.uRadius,'value').min(0.0).max(1.0).step(0.001).name('Radius')
-gui.add(material.uniforms.uRotationOffset,'value').min(0.0).max(24.283).step(0.001).name('RotationOffset')
-gui.add(material.uniforms.uDivision, 'value').min(1.0).max(50.0).step(2.0).name('Division')
+const mat2 =new THREE.ShaderMaterial({
+    vertexShader: testVertexShader,
+    fragmentShader: testFragmentShader2,
+    side: THREE.DoubleSide,
+    uniforms:{
+        uCenter: {value: new THREE.Vector2(0.5, 0.5)},
+        uTime: {value:0.0},
+    }
+})
+const mat3 =mat1;
+
+var scene_param_group =
+{
+    scene_choice: 0
+}
+gui.add(scene_param_group, 'scene_choice', [ 0,1,2 ] ).name('Effect').onChange( e => {
+    for (let index = 0; index < 3; index++) {
+        if (scene_param_group.scene_choice===index){
+
+            effects[index].show()
+            mesh.material=materials[index]
+        }
+        else 
+        {
+            effects[index].hide()
+           
+        }
+    }
+})
+
+const eff1=gui.addFolder('Effect_1')
+const eff2=gui.addFolder('Effect_2')
+const eff3=gui.addFolder('Effect_3')
+const effects = [eff1,eff2,eff3]
+const materials = [mat1,mat2,mat3]
+eff2.hide();
+eff3.hide();
+eff1.add(mat1.uniforms.uCenter.value, 'x').min(0.0).max(1.0).step(0.001).name('Center_X')
+eff1.add(mat1.uniforms.uCenter.value, 'y').min(0.0).max(1.0).step(0.001).name('Center_Y')
+eff1.add(mat1.uniforms.uUvOffset, 'value').min(-0.1).max(0.1).step(0.001).name('UvOffset')
+eff1.add(mat1.uniforms.uRadius,'value').min(0.0).max(1.0).step(0.001).name('Radius')
+eff1.add(mat1.uniforms.uRotationOffset,'value').min(0.0).max(24.283).step(0.001).name('RotationOffset')
+eff1.add(mat1.uniforms.uDivision, 'value').min(1.0).max(50.0).step(2.0).name('Division')
+
+eff2.add(mat2.uniforms.uCenter.value, 'x').min(0.0).max(1.0).step(0.001).name('Center_X')
+eff2.add(mat2.uniforms.uCenter.value, 'y').min(0.0).max(1.0).step(0.001).name('Center_Y')
+
+scene_param_group.scene_choice= 1
 // Mesh
-const mesh = new THREE.Mesh(geometry, material)
+const mesh = new THREE.Mesh(geometry, mat1)
 scene.add(mesh)
 
 /**
@@ -98,9 +141,14 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 /**
  * Animate
  */
+const clock = new THREE.Clock()
 const tick = () =>
 {
     // Update controls
+    const elapsedTime = clock.getElapsedTime()
+    if(scene_param_group.scene_choice==1){
+        materials[scene_param_group.scene_choice].uniforms.uTime.value=elapsedTime;
+    }
     controls.update()
 
     // Render
