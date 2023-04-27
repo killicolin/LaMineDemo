@@ -29,6 +29,14 @@ float is_pair (vec2 uv){
 vec2 determine_offset(vec2 uv){
     float step_angle = (PI)/uDivision;
     float new_angle = get_section_index(uv)*step_angle;
+    vec2 res=vec2(sin(new_angle+uRotationOffset),cos(new_angle+uRotationOffset));
+    return res;
+}
+
+//wrong effect, replace collage function to see it
+vec2 determine_funny_offset(vec2 uv){
+    float step_angle = (PI)/uDivision;
+    float new_angle = get_section_index(uv)*step_angle;
     vec2 res=vec2(sin(new_angle),cos(new_angle));
     return res;
 }
@@ -57,22 +65,9 @@ float collage(vec2 uv){
     return clean*res;
 }
 
-//wrong effect, replace collage function to see it
-// float funny_bump(vec2 uv)
-// {
-//     return is_offset_coeff(uv);
-// }
-
 void main()
 {
     vec2 uv = collage(vUv)*determine_offset(vUv)*uUvOffset;
     vec4 textureColor = texture2D(uTexture, vUv+uv);
     gl_FragColor = textureColor;
-    // vec2 coord = normalize(vec2(uCenter.x-vUv.x,uCenter.y-vUv.y));
-    // float angle = atan(coord.x,coord.y)+PI;
-    // angle = mod(angle-uRotationOffset,2.0*PI+0.00001);
-    // float step_angle = (2.0*PI)/uDivision;
-    // float new_angle = round((angle)/step_angle);
-    // float at = new_angle / uDivision;
-    //gl_FragColor = collage(vUv)*vec4(1.0,0.0,0.0,1.0)+(1.0-collage(vUv))*vec4(0.0,0.0,1.0,1.0);
 }
