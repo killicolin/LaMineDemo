@@ -81,9 +81,9 @@ eff2.hide();
 eff3.hide();
 eff1.add(mat1.uniforms.uCenter.value, 'x').min(0.0).max(1.0).step(0.001).name('Center_X')
 eff1.add(mat1.uniforms.uCenter.value, 'y').min(0.0).max(1.0).step(0.001).name('Center_Y')
-eff1.add(mat1.uniforms.uUvOffset, 'value').min(-0.1).max(0.1).step(0.001).name('UvOffset')
-eff1.add(mat1.uniforms.uRadius,'value').min(0.0).max(1.0).step(0.001).name('Radius')
-eff1.add(mat1.uniforms.uRotationOffset,'value').min(0.0).max(24.283).step(0.001).name('RotationOffset')
+eff1.add(mat1.uniforms.uUvOffset, 'value').min(-0.1).max(0.1).step(0.00001).name('UvOffset')
+eff1.add(mat1.uniforms.uRadius,'value').min(0.0).max(1.0).step(0.0001).name('Radius')
+eff1.add(mat1.uniforms.uRotationOffset,'value').min(0.0).max(3.14).step(0.0001).name('RotationOffset')
 eff1.add(mat1.uniforms.uDivision, 'value').min(1.0).max(50.0).step(2.0).name('Division')
 
 eff2.add(mat2.uniforms.uCenter.value, 'x').min(0.0).max(1.0).step(0.001).name('Center_X')
