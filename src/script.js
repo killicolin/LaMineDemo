@@ -64,7 +64,6 @@ var scene_param_group =
 }
 
 let scene_change = () => {
-    console.log("TEST");
     for (let index = 0; index < 3; index++) {
         if (scene_param_group.scene_choice===index){
 
@@ -187,5 +186,5 @@ const tick = () =>
 }
 
 tick()
-scene_param_group.scene_choice = 1
+scene_param_group.scene_choice= 1
 scene_change()
