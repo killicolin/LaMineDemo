@@ -55,9 +55,10 @@ const mat3 =mat1;
 
 var scene_param_group =
 {
-    scene_choice: 0
+    scene_choice: 1
 }
-gui.add(scene_param_group, 'scene_choice', [ 0,1,2 ] ).name('Effect').onChange( e => {
+
+let scene_change = () => {
     for (let index = 0; index < 3; index++) {
         if (scene_param_group.scene_choice===index){
 
@@ -70,13 +71,16 @@ gui.add(scene_param_group, 'scene_choice', [ 0,1,2 ] ).name('Effect').onChange( 
            
         }
     }
-})
+}
+
+gui.add(scene_param_group, 'scene_choice', [ 0,1,2 ] ).name('Effect').onChange( e => scene_change)
 
 const eff1=gui.addFolder('Effect_1')
 const eff2=gui.addFolder('Effect_2')
 const eff3=gui.addFolder('Effect_3')
 const effects = [eff1,eff2,eff3]
 const materials = [mat1,mat2,mat3]
+eff1.hide();
 eff2.hide();
 eff3.hide();
 eff1.add(mat1.uniforms.uCenter.value, 'x').min(0.0).max(1.0).step(0.001).name('Center_X')
@@ -89,7 +93,7 @@ eff1.add(mat1.uniforms.uDivision, 'value').min(1.0).max(50.0).step(2.0).name('Di
 eff2.add(mat2.uniforms.uCenter.value, 'x').min(0.0).max(1.0).step(0.001).name('Center_X')
 eff2.add(mat2.uniforms.uCenter.value, 'y').min(0.0).max(1.0).step(0.001).name('Center_Y')
 
-scene_param_group.scene_choice= 1
+
 // Mesh
 const mesh = new THREE.Mesh(geometry, mat1)
 scene.add(mesh)
@@ -159,3 +163,5 @@ const tick = () =>
 }
 
 tick()
+scene_param_group.scene_choice= 1
+scene_change()
