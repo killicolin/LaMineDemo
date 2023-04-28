@@ -49,6 +49,11 @@ const mat2 =new THREE.ShaderMaterial({
     uniforms:{
         uCenter: {value: new THREE.Vector2(0.5, 0.5)},
         uTime: {value:0.0},
+        uHitTime: {value:0.0},
+        uWaveSize: {value:0.2},
+        uWaveSpeed: {value:0.33},
+        uFadeSpeed: {value:0.5},
+        uWaveNumber: {value:3.0},
     }
 })
 const mat3 =mat1;
@@ -59,6 +64,7 @@ var scene_param_group =
 }
 
 let scene_change = () => {
+    console.log("TEST");
     for (let index = 0; index < 3; index++) {
         if (scene_param_group.scene_choice===index){
 
@@ -73,7 +79,7 @@ let scene_change = () => {
     }
 }
 
-gui.add(scene_param_group, 'scene_choice', [ 0,1,2 ] ).name('Effect').onChange( e => scene_change)
+gui.add(scene_param_group, 'scene_choice', [ 0,1,2 ] ).name('Effect').onChange(scene_change)
 
 const eff1=gui.addFolder('Effect_1')
 const eff2=gui.addFolder('Effect_2')
@@ -92,6 +98,24 @@ eff1.add(mat1.uniforms.uDivision, 'value').min(1.0).max(50.0).step(2.0).name('Di
 
 eff2.add(mat2.uniforms.uCenter.value, 'x').min(0.0).max(1.0).step(0.001).name('Center_X')
 eff2.add(mat2.uniforms.uCenter.value, 'y').min(0.0).max(1.0).step(0.001).name('Center_Y')
+eff2.add(mat2.uniforms.uWaveSize, 'value').min(0.0).max(1.0).step(0.001).name('Wave size')
+eff2.add(mat2.uniforms.uWaveSpeed, 'value').min(0.0).max(1.0).step(0.001).name('Wave speed')
+eff2.add(mat2.uniforms.uFadeSpeed, 'value').min(0.0).max(1.0).step(0.001).name('Fade speed')
+eff2.add(mat2.uniforms.uWaveNumber, 'value').min(0.0).max(20.0).step(1.0).name('Wave number')
+
+let redo = () => {
+    const elapsedTime = clock.getElapsedTime()
+    console.log(elapsedTime)
+    mat2.uniforms.uHitTime.value = elapsedTime
+}
+
+let utilitary = {
+    redoclick : redo
+}
+
+eff2.add(utilitary,'redoclick').name('ReDo');
+
+
 
 
 // Mesh
@@ -163,5 +187,5 @@ const tick = () =>
 }
 
 tick()
-scene_param_group.scene_choice= 1
+scene_param_group.scene_choice = 1
 scene_change()
