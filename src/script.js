@@ -48,8 +48,8 @@ const mat2 =new THREE.ShaderMaterial({
     side: THREE.DoubleSide,
     uniforms:{
         uCenter: {value: [new THREE.Vector2(0.5, 0.5),new THREE.Vector2(0.25, 0.25),new THREE.Vector2(0.75, 0.75)]},
+        uHitTime: {value:[-10.0,-10.0,-10.0]},
         uTime: {value:0.0},
-        uHitTime: {value:0.0},
         uWaveSize: {value:0.2},
         uWaveSpeed: {value:0.2},
         uFadeSpeed: {value:0.5},
@@ -108,15 +108,16 @@ eff2.add(mat2.uniforms.uWaveNumber, 'value').min(0.0).max(20.0).step(1.0).name('
 
 let redo = () => {
     const elapsedTime = clock.getElapsedTime()
-    console.log(elapsedTime)
-    mat2.uniforms.uHitTime.value = elapsedTime
+    mat2.uniforms.uHitTime.value[0] = elapsedTime
+    mat2.uniforms.uHitTime.value[1] = elapsedTime
+    mat2.uniforms.uHitTime.value[2] = elapsedTime
 }
 
 let utilitary = {
     redoclick : redo
 }
 
-eff2.add(utilitary,'redoclick').name('ReDo');
+eff2.add(utilitary,'redoclick').name('RePlay');
 
 
 
@@ -192,3 +193,47 @@ const tick = () =>
 tick()
 scene_param_group.scene_choice= 1
 scene_change()
+
+
+/**
+ * Mouse Interaction
+ */
+const onClickPosition = new THREE.Vector2();
+
+function getMousePosition( dom, x, y ) {
+    const rect = dom.getBoundingClientRect();
+    return [ ( x - rect.left ) / rect.width, ( y - rect.top ) / rect.height ];
+}
+
+
+function getIntersects( point, objects ) {
+    const mouse= new THREE.Vector2();
+    const raycaster = new THREE.Raycaster();
+    mouse.set( ( point.x * 2 ) - 1, - ( point.y * 2 ) + 1 );
+    raycaster.setFromCamera( mouse, camera );
+    return raycaster.intersectObjects( objects, false );
+
+}
+
+function onMouseClick( evt ) {
+    if(scene_param_group.scene_choice!=1){
+        return;
+    }
+    evt.preventDefault();
+    const array = getMousePosition( canvas, evt.clientX, evt.clientY );
+    onClickPosition.fromArray( array );
+    const intersects = getIntersects( onClickPosition, scene.children );
+    if ( intersects.length > 0 && intersects[0].uv ) {
+        const uv = intersects[0].uv;
+        const elapsedTime = clock.getElapsedTime()
+        intersects[0].object.material.uniforms.uHitTime.value[i_clicked] = elapsedTime
+        intersects[0].object.material.uniforms.uCenter.value[i_clicked]=uv;
+        i_clicked++
+        i_clicked = i_clicked %3;
+    }
+
+}
+
+var i_clicked =0;
+
+canvas.addEventListener( 'click', onMouseClick );

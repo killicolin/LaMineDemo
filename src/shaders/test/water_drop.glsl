@@ -1,5 +1,5 @@
 uniform vec2 uCenter[3];
-uniform float uHitTime;
+uniform float uHitTime[3];
 uniform float uTime;
 uniform float uWaveSize;
 uniform float uWaveSpeed;
@@ -27,7 +27,7 @@ void main()
     for(int i=0;i<3;++i)
     {
         float dist = distance(vUv,uCenter[i]);
-        custom += make_onde(dist,uHitTime);
+        custom += make_onde(dist,uHitTime[i]);
     }
     vec3 color = vec3(vUv, 1.0) * custom + vec3(0.1,0.1,0.1) * (1.0-custom);
     gl_FragColor = vec4(color,1.0);
