@@ -47,11 +47,11 @@ const mat2 =new THREE.ShaderMaterial({
     fragmentShader: testFragmentShader2,
     side: THREE.DoubleSide,
     uniforms:{
-        uCenter: {value: new THREE.Vector2(0.5, 0.5)},
+        uCenter: {value: [new THREE.Vector2(0.5, 0.5),new THREE.Vector2(0.25, 0.25),new THREE.Vector2(0.75, 0.75)]},
         uTime: {value:0.0},
         uHitTime: {value:0.0},
         uWaveSize: {value:0.2},
-        uWaveSpeed: {value:0.33},
+        uWaveSpeed: {value:0.2},
         uFadeSpeed: {value:0.5},
         uWaveNumber: {value:3.0},
     }
@@ -95,8 +95,12 @@ eff1.add(mat1.uniforms.uRadius,'value').min(0.0).max(1.0).step(0.0001).name('Rad
 eff1.add(mat1.uniforms.uRotationOffset,'value').min(0.0).max(3.14).step(0.0001).name('RotationOffset')
 eff1.add(mat1.uniforms.uDivision, 'value').min(1.0).max(50.0).step(2.0).name('Division')
 
-eff2.add(mat2.uniforms.uCenter.value, 'x').min(0.0).max(1.0).step(0.001).name('Center_X')
-eff2.add(mat2.uniforms.uCenter.value, 'y').min(0.0).max(1.0).step(0.001).name('Center_Y')
+eff2.add(mat2.uniforms.uCenter.value[0], 'x').min(0.0).max(1.0).step(0.001).name('Center0_X')
+eff2.add(mat2.uniforms.uCenter.value[0], 'y').min(0.0).max(1.0).step(0.001).name('Center0_Y')
+eff2.add(mat2.uniforms.uCenter.value[1], 'x').min(0.0).max(1.0).step(0.001).name('Center1_X')
+eff2.add(mat2.uniforms.uCenter.value[1], 'y').min(0.0).max(1.0).step(0.001).name('Center1_Y')
+eff2.add(mat2.uniforms.uCenter.value[2], 'x').min(0.0).max(1.0).step(0.001).name('Center2_X')
+eff2.add(mat2.uniforms.uCenter.value[2], 'y').min(0.0).max(1.0).step(0.001).name('Center2_Y')
 eff2.add(mat2.uniforms.uWaveSize, 'value').min(0.0).max(1.0).step(0.001).name('Wave size')
 eff2.add(mat2.uniforms.uWaveSpeed, 'value').min(0.0).max(1.0).step(0.001).name('Wave speed')
 eff2.add(mat2.uniforms.uFadeSpeed, 'value').min(0.0).max(1.0).step(0.001).name('Fade speed')
