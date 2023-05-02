@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "lil-gui": "^0.17.0",
-    "paper": "^0.12.17",
-    "three": "^0.148.0"
+    "three": "^0.148.0",
+    "voronoi": "^1.0.0"
   }
 }
