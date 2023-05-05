@@ -144,7 +144,7 @@ const height = 1;
 
 var scene_param_group =
 {
-    scene_choice: 1,
+    scene_choice: 0,
     nPoints:50,
 }
 
@@ -362,7 +362,7 @@ const tick = () =>
 }
 
 tick()
-scene_param_group.scene_choice= 1
+scene_param_group.scene_choice= 0
 scene_change()
 
 
