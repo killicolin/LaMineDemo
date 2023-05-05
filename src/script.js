@@ -26,7 +26,8 @@ const geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
 
 // texture
 const textureLoader = new THREE.TextureLoader();
-const flagTexture = textureLoader.load('textures/test3.jpg')
+const flagTexture = textureLoader.load('textures/test.jpg')
+const flagTexture2 = textureLoader.load('textures/test3.jpg')
 
 // Material
 const mat1 = new THREE.ShaderMaterial({
@@ -59,7 +60,21 @@ const mat2 =new THREE.ShaderMaterial({
     }
 })
 //scene 3
-const mat3 = mat1;
+const mat3 = new THREE.ShaderMaterial({
+    vertexShader: testVertexShader,
+    fragmentShader: testFragmentShader1,
+    side: THREE.DoubleSide,
+    uniforms:{
+        uScale:{value:0.1},
+        uUvOffset: {value:0.0},
+        uRadius: {value:0.0},
+        uRotationOffset: {value:0.00},
+        uCenter: {value: new THREE.Vector2(0.0, 0.0)},
+        uDivision : {value:1.0},
+        uTexture: { value: flagTexture2 }
+    }
+});
+
 const voronoi = new Voronoi();
 function randomPoints([width, height], nPoints, margin = 0) {
     const points = [];
@@ -85,14 +100,6 @@ function notRandomPoints([width, height], nPoints, margin = 0) {
     }
     return points;
 }
-  
-const margin = 0;//0.01;
-const width = 1;
-const height = 1;
-const nPoints = 50;
-const points = randomPoints([width, height], nPoints, margin);
-const bbox = { xl: margin, xr: width - margin, yt: margin, yb: height - margin };
-const diagram = voronoi.compute(points, bbox);
 
 const scene3 = new THREE.Group()
 
@@ -131,87 +138,14 @@ function indexToList(indexPreprocess){
     return res
 }
 
-var now =2;
-var nowValue = 0;
-diagram.cells.forEach(cell => {
-    var pointList=[];
-    var indexPreprocess=[];
-    const geometry = new THREE.BufferGeometry()
-    const length = cell.halfedges.length;
-    const center = cell.site;
-    const positionsArray = new Float32Array(length * 3)
-    const uvsArray = new Float32Array(length * 2)
-    var j =0;
-    for (let i = 0; i < length; i++) {
-        const a =cell.halfedges[i].edge.va;
-        var index_a = indexAlreadyReferenced(a,pointList,0.0000001)
-        if (index_a == null){
-            index_a = pointList.length;
-            indexPreprocess.push([]);
-            pointList.push(a)
-            const x = a.x-center.x;
-            const y = a.y-center.y;
-            uvsArray[j*2 + 0]=a.x;
-            uvsArray[j*2 + 1]=a.y;
-            positionsArray[j*3 + 0]=x;
-            positionsArray[j*3 + 1]=y;
-            positionsArray[j*3 + 2]=0.0;
-            j++;
-        }
-        const b =cell.halfedges[i].edge.vb;
-        var index_b = indexAlreadyReferenced(b,pointList,0.0000001)
-        if (index_b == null){
-            index_b = pointList.length;
-            indexPreprocess.push([]);
-            pointList.push(b)
-            const x = b.x-center.x;
-            const y = b.y-center.y;
-            uvsArray[j*2 + 0]=b.x;
-            uvsArray[j*2 + 1]=b.y;
-            positionsArray[j*3 + 0]=x;
-            positionsArray[j*3 + 1]=y;
-            positionsArray[j*3 + 2]=0.0;
-            j++;
-        }
-        indexPreprocess[index_b].push(index_a);
-        indexPreprocess[index_a].push(index_b);
-    }
-    var toLoop =[]
-    for (let index = 0; index < indexPreprocess.length; index++) {
-        if (indexPreprocess[index].length == 1) {
-            toLoop.push(index)
-        }
-    }
-
-    const indexOrder=indexToList(indexPreprocess);
-    const indices = [];
-    for (let i = 0; i < indexOrder.length-1; i++) {
-        const baseIndex = i*3
-        indices[baseIndex]=0;
-        indices[baseIndex+1]=indexOrder[i];
-        indices[baseIndex+2]=indexOrder[i+1];
-    }
-    for (let index = 0; index < pointList.length; index++) {
-        const element = pointList[index];
-    }
-    geometry.setIndex( indices );
-    const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3)
-    geometry.setAttribute('position', positionsAttribute)
-    const uvsAttribute = new THREE.BufferAttribute(uvsArray, 2)
-    geometry.setAttribute('uv', uvsAttribute)
-    const partMesh = new THREE.Mesh( geometry, mat3 );
-    partMesh.position.x=center.x-0.5;
-    partMesh.position.y=center.y-0.5;
-    partMesh.position.z=0.0;
-    scene3.add(partMesh)
-//}
-nowValue++
-})
-
+const margin = 0;//0.01;
+const width = 1;
+const height = 1;
 
 var scene_param_group =
 {
-    scene_choice: 1
+    scene_choice: 1,
+    nPoints:50,
 }
 
 let scene_change = () => {
@@ -226,8 +160,90 @@ let scene_change = () => {
             effects[index].hide()
         }
     }
+    scene3.visible=scene_param_group.scene_choice==2;
+    mesh.visible=scene_param_group.scene_choice!=2
 }
 
+let change_voronoi=(val) => {
+
+    const points = randomPoints([width, height], val, margin);
+    const bbox = { xl: margin, xr: width - margin, yt: margin, yb: height - margin };
+    const diagram = voronoi.compute(points, bbox);
+    scene3.clear()
+    diagram.cells.forEach(cell => {
+        var pointList=[];
+        var indexPreprocess=[];
+        const geometry = new THREE.BufferGeometry()
+        const length = cell.halfedges.length;
+        const center = cell.site;
+        const positionsArray = new Float32Array(length * 3)
+        const uvsArray = new Float32Array(length * 2)
+        var j =0;
+        for (let i = 0; i < length; i++) {
+            const a =cell.halfedges[i].edge.va;
+            var index_a = indexAlreadyReferenced(a,pointList,0.0000001)
+            if (index_a == null){
+                index_a = pointList.length;
+                indexPreprocess.push([]);
+                pointList.push(a)
+                const x = a.x-center.x;
+                const y = a.y-center.y;
+                uvsArray[j*2 + 0]=a.x;
+                uvsArray[j*2 + 1]=a.y;
+                positionsArray[j*3 + 0]=x;
+                positionsArray[j*3 + 1]=y;
+                positionsArray[j*3 + 2]=0.0;
+                j++;
+            }
+            const b =cell.halfedges[i].edge.vb;
+            var index_b = indexAlreadyReferenced(b,pointList,0.0000001)
+            if (index_b == null){
+                index_b = pointList.length;
+                indexPreprocess.push([]);
+                pointList.push(b)
+                const x = b.x-center.x;
+                const y = b.y-center.y;
+                uvsArray[j*2 + 0]=b.x;
+                uvsArray[j*2 + 1]=b.y;
+                positionsArray[j*3 + 0]=x;
+                positionsArray[j*3 + 1]=y;
+                positionsArray[j*3 + 2]=0.0;
+                j++;
+            }
+            indexPreprocess[index_b].push(index_a);
+            indexPreprocess[index_a].push(index_b);
+        }
+        var toLoop =[]
+        for (let index = 0; index < indexPreprocess.length; index++) {
+            if (indexPreprocess[index].length == 1) {
+                toLoop.push(index)
+            }
+        }
+    
+        const indexOrder=indexToList(indexPreprocess);
+        const indices = [];
+        for (let i = 0; i < indexOrder.length-1; i++) {
+            const baseIndex = i*3
+            indices[baseIndex]=0;
+            indices[baseIndex+1]=indexOrder[i];
+            indices[baseIndex+2]=indexOrder[i+1];
+        }
+        for (let index = 0; index < pointList.length; index++) {
+            const element = pointList[index];
+        }
+        geometry.setIndex( indices );
+        const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3)
+        geometry.setAttribute('position', positionsAttribute)
+        const uvsAttribute = new THREE.BufferAttribute(uvsArray, 2)
+        geometry.setAttribute('uv', uvsAttribute)
+        const partMesh = new THREE.Mesh( geometry, mat3 );
+        partMesh.position.x=center.x-0.5;
+        partMesh.position.y=center.y-0.5;
+        partMesh.position.z=0.0;
+        scene3.add(partMesh)
+    })
+}
+change_voronoi(scene_param_group.nPoints);
 gui.add(scene_param_group, 'scene_choice', [ 0,1,2 ] ).name('Effect').onChange(scene_change)
 
 const eff1=gui.addFolder('Effect_1')
@@ -244,7 +260,6 @@ eff1.add(mat1.uniforms.uUvOffset, 'value').min(-0.1).max(0.1).step(0.00001).name
 eff1.add(mat1.uniforms.uRadius,'value').min(0.0).max(1.0).step(0.0001).name('Radius')
 eff1.add(mat1.uniforms.uRotationOffset,'value').min(0.0).max(3.14).step(0.0001).name('RotationOffset')
 eff1.add(mat1.uniforms.uDivision, 'value').min(1.0).max(50.0).step(2.0).name('Division')
-eff1.add(mat1.uniforms.uScale, 'value').min(0.0).max(1.0).step(0.0001).name('Scale')
 
 eff2.add(mat2.uniforms.uCenter.value[0], 'x').min(0.0).max(1.0).step(0.001).name('Center0_X')
 eff2.add(mat2.uniforms.uCenter.value[0], 'y').min(0.0).max(1.0).step(0.001).name('Center0_Y')
@@ -256,6 +271,10 @@ eff2.add(mat2.uniforms.uWaveSize, 'value').min(0.0).max(1.0).step(0.001).name('W
 eff2.add(mat2.uniforms.uWaveSpeed, 'value').min(0.0).max(1.0).step(0.001).name('Wave speed')
 eff2.add(mat2.uniforms.uFadeSpeed, 'value').min(0.0).max(1.0).step(0.001).name('Fade speed')
 eff2.add(mat2.uniforms.uWaveNumber, 'value').min(0.0).max(20.0).step(1.0).name('Wave number')
+
+
+eff3.add(scene_param_group, 'nPoints').min(2.0).max(400.0).step(1).name('Partitions').onFinishChange(change_voronoi)
+eff3.add(mat3.uniforms.uScale, 'value').min(0.0).max(1.0).step(0.0001).name('Scale')
 
 let redo = () => {
     const elapsedTime = clock.getElapsedTime()
@@ -276,9 +295,7 @@ eff2.add(utilitary,'redoclick').name('RePlay');
 // Mesh
 const mesh = new THREE.Mesh(geometry, mat1)
 scene.add(scene3)
-// const box = new THREE.BoxHelper( scene3, 0xffff00 );
-// scene.add( box );
-// scene.add(mesh)
+scene.add(mesh)
 
 /**
  * Sizes
